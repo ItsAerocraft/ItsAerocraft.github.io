@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Amogus</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -77,6 +77,24 @@
   }
   .file-label:hover { border-color: var(--accent); color: var(--accent); }
   #fileInput { display: none; }
+
+  .controls-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .small-btn {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .small-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   .stats-bar {
     width: 100%;
@@ -335,10 +353,27 @@
 
 <header>
   <h1>Deutsch Üben <span>IB German Flashcards • 5 correct = mastered</span></h1>
-  <label class="file-label" for="fileInput">
-    ⬆ Upload .xlsx
-    <input type="file" id="fileInput" accept=".xlsx">
-  </label>
+
+  <div class="controls-row">
+    <!-- File upload -->
+    <label class="file-label" for="fileInput">
+      ⬆ Upload .xlsx
+      <input type="file" id="fileInput" accept=".xlsx">
+    </label>
+
+    <!-- Randomise button -->
+    <button id="randomiseBtn" class="small-btn" title="Shuffle card order">🔀 Randomise</button>
+
+    <!-- Repeat choice -->
+    <div style="display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:0.82rem;">
+      <label style="display:inline-flex; align-items:center; gap:6px; color:var(--muted);">
+        <input type="radio" name="repeatChoice" id="repeat1" value="1"> 1
+      </label>
+      <label style="display:inline-flex; align-items:center; gap:6px; color:var(--muted);">
+        <input type="radio" name="repeatChoice" id="repeat5" value="5" checked> 5
+      </label>
+    </div>
+  </div>
 </header>
 
 <div class="stats-bar">
@@ -367,7 +402,7 @@
 
 <div id="completionScreen">
   <h2>Alle Karten gemeistert! 🎉</h2>
-  <p>You've completed every word with 5 correct answers each.</p>
+  <p>You've completed every word with the selected correct-count requirement each.</p>
   <button class="btn" onclick="restartAll()">Start Over</button>
 </div>
 
@@ -383,13 +418,13 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.0/dist/xlsx.full.min.js"></script>
 <script>
   // ─────────────────────────────────────────────────────────────
-  // NEW CONFIG: 5 attempts (correct answers) required per word
-  const REQUIRED_CORRECT = 5;   // each word must be answered correctly 5 times
+  // Default required correct will be controlled by radio buttons (1 or 5)
+  let REQUIRED_CORRECT = 5;   // dynamic based on user selection
   // ─────────────────────────────────────────────────────────────
   const WINDOW_SIZE = 5;
 
   // Global state
-  let allCards = [];       // each: { phrase, definition, correctCount, done }
+  let allCards = [];       // each: { phrase, definition, correctCount, done, id }
   let windowStart = 0;
   let currentCard = null;
   let wrongShown = false;  // track if we already displayed correct answer for current wrong attempt
@@ -403,6 +438,26 @@
   const cardActions = document.getElementById('cardActions');
   const tableWrap = document.getElementById('tableWrap');
   const wordListTable = document.getElementById('wordListTable');
+  const randomiseBtn = document.getElementById('randomiseBtn');
+  const repeat1 = document.getElementById('repeat1');
+  const repeat5 = document.getElementById('repeat5');
+
+  // Attach handlers
+  fileInput.addEventListener('change', handleFile);
+  randomiseBtn.addEventListener('click', handleRandomise);
+  repeat1.addEventListener('change', onRepeatChange);
+  repeat5.addEventListener('change', onRepeatChange);
+
+  function onRepeatChange() {
+    // If running, stop and apply new requirement. Here we just apply.
+    const val = document.querySelector('input[name="repeatChoice"]:checked').value;
+    REQUIRED_CORRECT = parseInt(val, 10) || 5;
+    // Update header text and UI labels that mention 5
+    document.querySelector('h1 span').textContent = `IB German Flashcards • ${REQUIRED_CORRECT} correct = mastered`;
+    // If cards loaded, update word list and progress text to reflect change
+    renderWordList();
+    updateStats();
+  }
 
   // ── File handling ────────────────────────────────────────────
   fileInput.addEventListener('change', handleFile);
@@ -430,17 +485,41 @@
     totalCorrect = 0;
     totalWrong = 0;
     const rows = data.slice(1);
+    let idCounter = 1;
     for (let row of rows) {
       if (row[0] && row[1]) {
         allCards.push({
+          id: idCounter++,
           phrase: String(row[0]),
           definition: String(row[1]),
-          correctCount: 0,     // number of times answered correctly (max REQUIRED_CORRECT)
+          correctCount: 0,     // number of times answered correctly
           done: false
         });
       }
     }
     updateStats();
+  }
+
+  // Fisher-Yates shuffle (in-place)
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  function handleRandomise() {
+    if (allCards.length === 0) return;
+    // Shuffle order of allCards but preserve each card's progress (correctCount/done)
+    shuffleInPlace(allCards);
+    // Reset window pointer so user starts at the beginning of the shuffled deck
+    windowStart = 0;
+    // Update UI: if a card is currently displayed, switch to a new random card from window
+    nextCard();
+    renderWordList();
+    updateStats();
+    // Briefly show a pulse to indicate shuffle (optional visual cue)
+    randomiseBtn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }, { transform: 'scale(1)' }], { duration: 220 });
   }
 
   // ── Game logic ───────────────────────────────────────────────
@@ -487,7 +566,7 @@
         if (allCards.every(c => c.done)) {
           showCompletion();
         } else {
-          // fallback: restart from first window? but it should not happen: ensure loop
+          // fallback: restart from first window
           if (windowStart >= allCards.length) windowStart = 0;
           advanceWindow();
           nextCard();
@@ -515,7 +594,6 @@
     // visual indicator: show how many correct answers still needed
     const livesHtml = Array.from({ length: REQUIRED_CORRECT }, (_, i) => {
       const isCompleted = i < currentCard.correctCount;
-      // completed steps look "filled" (greenish), remaining steps as empty outline style
       return `<span class="life${!isCompleted ? '' : ' dead'}" style="opacity: ${isCompleted ? 0.35 : 1};">★</span>`;
     }).join('');
 
@@ -563,7 +641,6 @@
         msgDiv.textContent = `✓ Richtig! (${currentCard.correctCount}/${REQUIRED_CORRECT} correct)`;
       }
       input.value = '';
-      // clear any extra reveal if exists
       const existingReveal = fc.querySelector('.answer-reveal');
       if (existingReveal) existingReveal.remove();
       setTimeout(() => {
@@ -578,14 +655,13 @@
         msgDiv.className = 'feedback-msg bad';
         msgDiv.textContent = `✗ Falsch. Try again.`;
       }
-      // Show correct answer only once per wrong attempt (like original design)
+      // Show correct answer only once per wrong attempt
       if (!wrongShown) {
         wrongShown = true;
         const reveal = document.createElement('div');
         reveal.className = 'answer-reveal';
         reveal.innerHTML = `<strong>Correct answer:</strong> ${escHtml(correctAnswer)}`;
         fc.appendChild(reveal);
-        // auto-clean after timeout so it disappears when next card loads or after 2 sec
         setTimeout(() => {
           if (reveal && reveal.parentNode) reveal.remove();
         }, 2000);
@@ -642,7 +718,7 @@
     nextCard();
   }
 
-  // ── Word list table (shows progress per card as 5 circles) ──
+  // ── Word list table (shows progress per card as N circles) ──
   function toggleWordList() {
     if (!tableWrap) return;
     tableWrap.style.display = tableWrap.style.display === 'none' ? 'block' : 'none';
@@ -696,6 +772,11 @@
   window.startGame = startGame;
   window.toggleWordList = toggleWordList;
   window.restartAll = restartAll;
+
+  // Initialize repeat label from radio default
+  document.addEventListener('DOMContentLoaded', () => {
+    onRepeatChange();
+  });
 </script>
 </body>
 </html>
