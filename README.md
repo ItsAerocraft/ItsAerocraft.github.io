@@ -15,6 +15,7 @@
     --accent2: #5bc8af;
     --red: #e85454;
     --green: #5bc87a;
+    --purple: #a78bfa;
     --text: #f0eee6;
     --muted: #7a7a8a;
     --radius: 12px;
@@ -82,6 +83,8 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .small-btn {
@@ -93,8 +96,29 @@
     font-family: 'DM Mono', monospace;
     font-size: 0.8rem;
     cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
   }
   .small-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* 2-part mode toggle */
+  #twoPartBtn {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  #twoPartBtn.active {
+    background: #1e1530;
+    border-color: var(--purple);
+    color: var(--purple);
+  }
+  #twoPartBtn:hover { border-color: var(--purple); color: var(--purple); }
 
   .stats-bar {
     width: 100%;
@@ -176,6 +200,24 @@
     0%,100%{ opacity:1; } 50%{ opacity:0.3; }
   }
 
+  /* 2-part mode banner */
+  .two-part-banner {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 12px;
+    background: #1e1530;
+    border: 1px solid var(--purple);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.72rem;
+    color: var(--purple);
+    letter-spacing: 0.07em;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .two-part-banner.visible { display: flex; }
+
   #flashcard {
     width: 100%;
     max-width: 680px;
@@ -190,6 +232,7 @@
 
   #flashcard.correct { background: #1b2e21; border-color: var(--green); }
   #flashcard.wrong   { background: #2e1b1b; border-color: var(--red); }
+  #flashcard.partial { background: #1e1530; border-color: var(--purple); }
 
   .word-badge {
     display: inline-block;
@@ -230,6 +273,35 @@
     margin-bottom: 14px;
   }
 
+  /* Two-part inputs layout */
+  .two-part-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .two-part-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .two-part-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    min-width: 52px;
+  }
+
+  .part-status {
+    font-size: 0.9rem;
+    min-width: 20px;
+    text-align: center;
+  }
+
   input[type="text"] {
     flex: 1;
     background: var(--surface2);
@@ -243,6 +315,9 @@
     transition: border-color 0.2s;
   }
   input[type="text"]:focus { border-color: var(--accent2); }
+  input[type="text"].input-correct { border-color: var(--green); background: #1b2e21; }
+  input[type="text"].input-wrong  { border-color: var(--red); }
+  input[type="text"].input-purple { border-color: var(--purple); }
 
   .btn {
     background: var(--accent);
@@ -279,6 +354,14 @@
   }
   .answer-reveal strong { color: var(--red); }
 
+  /* partial reveal for 2-part */
+  .answer-reveal.partial-reveal {
+    background: #1e1530;
+    border-color: var(--purple);
+    color: #c4b5fd;
+  }
+  .answer-reveal.partial-reveal strong { color: var(--purple); }
+
   .feedback-msg {
     margin-top: 10px;
     font-size: 0.85rem;
@@ -288,6 +371,7 @@
   }
   .feedback-msg.ok { color: var(--green); }
   .feedback-msg.bad { color: var(--red); }
+  .feedback-msg.partial { color: var(--purple); }
 
   .card-actions {
     width: 100%;
@@ -320,7 +404,6 @@
   }
   .pip.active { background: var(--accent2); }
   .pip.done { background: var(--green); }
-  .pip.miss { background: #5a3e3e; } /* neutral for attempts already used (inactive) */
 
   .empty-state {
     text-align: center;
@@ -352,19 +435,19 @@
 <body>
 
 <header>
-  <h1>Deutsch Üben <span>IB German Flashcards • 5 correct = mastered</span></h1>
+  <h1>Flashcards<span>Choose # correct and mode</span></h1>
 
   <div class="controls-row">
-    <!-- File upload -->
     <label class="file-label" for="fileInput">
       ⬆ Upload .xlsx
       <input type="file" id="fileInput" accept=".xlsx">
     </label>
 
-    <!-- Randomise button -->
     <button id="randomiseBtn" class="small-btn" title="Shuffle card order">🔀 Randomise</button>
 
-    <!-- Repeat choice -->
+    <!-- 2-part mode toggle -->
+    <button id="twoPartBtn" title="Require both parts of the definition (split by ; or /)">✦ 2-Part Mode</button>
+
     <div style="display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:0.82rem;">
       <label style="display:inline-flex; align-items:center; gap:6px; color:var(--muted);">
         <input type="radio" name="repeatChoice" id="repeat1" value="1"> 1
@@ -393,6 +476,11 @@
   <span id="windowLabel">Window: cards 1–5</span>
 </div>
 
+<!-- 2-part mode banner -->
+<div class="two-part-banner" id="twoPartBanner">
+  ✦ 2-Part Mode active — definitions split by <code style="background:#2e2040;padding:1px 5px;border-radius:4px;">;</code> or <code style="background:#2e2040;padding:1px 5px;border-radius:4px;">/</code> — fill in both parts to score
+</div>
+
 <div id="flashcard">
   <div class="empty-state">
     <div class="icon">📂</div>
@@ -401,7 +489,7 @@
 </div>
 
 <div id="completionScreen">
-  <h2>Alle Karten gemeistert! 🎉</h2>
+  <h2>Complete! 🎉</h2>
   <p>You've completed every word with the selected correct-count requirement each.</p>
   <button class="btn" onclick="restartAll()">Start Over</button>
 </div>
@@ -412,26 +500,28 @@
 </div>
 
 <div class="table-wrap" id="tableWrap">
-  <table id="wordListTable"><table>
+  <table id="wordListTable"></table>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.0/dist/xlsx.full.min.js"></script>
 <script>
-  // ─────────────────────────────────────────────────────────────
-  // Default required correct will be controlled by radio buttons (1 or 5)
-  let REQUIRED_CORRECT = 5;   // dynamic based on user selection
-  // ─────────────────────────────────────────────────────────────
+  let REQUIRED_CORRECT = 5;
   const WINDOW_SIZE = 5;
 
-  // Global state
-  let allCards = [];       // each: { phrase, definition, correctCount, done, id }
+  // 2-part mode state
+  let twoPartMode = false;
+
+  let allCards = [];
   let windowStart = 0;
   let currentCard = null;
-  let wrongShown = false;  // track if we already displayed correct answer for current wrong attempt
-  let totalCorrect = 0;     // total correct inputs across game (session)
-  let totalWrong = 0;       // total wrong inputs
+  let wrongShown = false;
+  let totalCorrect = 0;
+  let totalWrong = 0;
 
-  // DOM elements
+  // For 2-part mode: track which parts have been correctly entered this attempt
+  let part1Correct = false;
+  let part2Correct = false;
+
   const fileInput = document.getElementById('fileInput');
   const flashcardDiv = document.getElementById('flashcard');
   const completionScreen = document.getElementById('completionScreen');
@@ -439,29 +529,58 @@
   const tableWrap = document.getElementById('tableWrap');
   const wordListTable = document.getElementById('wordListTable');
   const randomiseBtn = document.getElementById('randomiseBtn');
+  const twoPartBtn = document.getElementById('twoPartBtn');
+  const twoPartBanner = document.getElementById('twoPartBanner');
   const repeat1 = document.getElementById('repeat1');
   const repeat5 = document.getElementById('repeat5');
 
-  // Attach handlers
   fileInput.addEventListener('change', handleFile);
   randomiseBtn.addEventListener('click', handleRandomise);
   repeat1.addEventListener('change', onRepeatChange);
   repeat5.addEventListener('change', onRepeatChange);
+  twoPartBtn.addEventListener('click', toggleTwoPartMode);
+
+  // ── 2-Part Mode ──────────────────────────────────────────────
+  function toggleTwoPartMode() {
+    twoPartMode = !twoPartMode;
+    twoPartBtn.classList.toggle('active', twoPartMode);
+    twoPartBanner.classList.toggle('visible', twoPartMode);
+    // Re-render current card if one is showing
+    if (currentCard) {
+      wrongShown = false;
+      part1Correct = false;
+      part2Correct = false;
+      renderCard();
+    }
+  }
+
+  /**
+   * Split a definition into up to 2 parts using ; or / as delimiter.
+   * Returns array of 1 or 2 trimmed strings.
+   */
+  function splitDefinition(def) {
+    // Try semicolon first, then slash
+    const bySemi = def.split(';');
+    if (bySemi.length >= 2) {
+      return [bySemi[0].trim(), bySemi.slice(1).join(';').trim()];
+    }
+    const bySlash = def.split('/');
+    if (bySlash.length >= 2) {
+      return [bySlash[0].trim(), bySlash.slice(1).join('/').trim()];
+    }
+    // No delimiter found — return as single part
+    return [def.trim()];
+  }
 
   function onRepeatChange() {
-    // If running, stop and apply new requirement. Here we just apply.
     const val = document.querySelector('input[name="repeatChoice"]:checked').value;
     REQUIRED_CORRECT = parseInt(val, 10) || 5;
-    // Update header text and UI labels that mention 5
     document.querySelector('h1 span').textContent = `IB German Flashcards • ${REQUIRED_CORRECT} correct = mastered`;
-    // If cards loaded, update word list and progress text to reflect change
     renderWordList();
     updateStats();
   }
 
   // ── File handling ────────────────────────────────────────────
-  fileInput.addEventListener('change', handleFile);
-
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -492,7 +611,7 @@
           id: idCounter++,
           phrase: String(row[0]),
           definition: String(row[1]),
-          correctCount: 0,     // number of times answered correctly
+          correctCount: 0,
           done: false
         });
       }
@@ -500,7 +619,6 @@
     updateStats();
   }
 
-  // Fisher-Yates shuffle (in-place)
   function shuffleInPlace(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -510,15 +628,11 @@
 
   function handleRandomise() {
     if (allCards.length === 0) return;
-    // Shuffle order of allCards but preserve each card's progress (correctCount/done)
     shuffleInPlace(allCards);
-    // Reset window pointer so user starts at the beginning of the shuffled deck
     windowStart = 0;
-    // Update UI: if a card is currently displayed, switch to a new random card from window
     nextCard();
     renderWordList();
     updateStats();
-    // Briefly show a pulse to indicate shuffle (optional visual cue)
     randomiseBtn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }, { transform: 'scale(1)' }], { duration: 220 });
   }
 
@@ -526,7 +640,6 @@
   function startGame() {
     if (allCards.length === 0) { alert('Upload an Excel file first (with columns: German, English).'); return; }
     windowStart = 0;
-    // Reset all cards: correctCount = 0, done = false
     allCards.forEach(c => { c.correctCount = 0; c.done = false; });
     totalCorrect = 0;
     totalWrong = 0;
@@ -536,7 +649,6 @@
     nextCard();
   }
 
-  // Advances windowStart so it points to a block that has at least one active (non-done) card
   function advanceWindow() {
     while (windowStart < allCards.length) {
       const end = Math.min(windowStart + WINDOW_SIZE, allCards.length);
@@ -547,7 +659,6 @@
     }
   }
 
-  // Returns array of active (not done) cards within current sliding window
   function getActiveWindowCards() {
     advanceWindow();
     const end = Math.min(windowStart + WINDOW_SIZE, allCards.length);
@@ -557,16 +668,13 @@
   function nextCard() {
     const activePool = getActiveWindowCards();
     if (activePool.length === 0) {
-      // no active cards in current window -> move to next window if possible
       if (windowStart + WINDOW_SIZE < allCards.length) {
         windowStart += WINDOW_SIZE;
         nextCard();
       } else {
-        // check if all cards globally are done
         if (allCards.every(c => c.done)) {
           showCompletion();
         } else {
-          // fallback: restart from first window
           if (windowStart >= allCards.length) windowStart = 0;
           advanceWindow();
           nextCard();
@@ -574,10 +682,11 @@
       }
       return;
     }
-    // pick random active card from window
     const randomIndex = Math.floor(Math.random() * activePool.length);
     currentCard = activePool[randomIndex];
     wrongShown = false;
+    part1Correct = false;
+    part2Correct = false;
     renderCard();
     updateStats();
     updateWindowIndicator();
@@ -591,87 +700,197 @@
     fc.style.display = 'block';
 
     const remainingAttempts = REQUIRED_CORRECT - currentCard.correctCount;
-    // visual indicator: show how many correct answers still needed
     const livesHtml = Array.from({ length: REQUIRED_CORRECT }, (_, i) => {
       const isCompleted = i < currentCard.correctCount;
-      return `<span class="life${!isCompleted ? '' : ' dead'}" style="opacity: ${isCompleted ? 0.35 : 1};">★</span>`;
+      return `<span class="life${isCompleted ? ' dead' : ''}" style="opacity:${isCompleted ? 0.35 : 1}">★</span>`;
     }).join('');
 
+    const parts = twoPartMode ? splitDefinition(currentCard.definition) : null;
+    const isTrulyTwoPart = parts && parts.length === 2;
+
+    let inputHtml;
+    if (isTrulyTwoPart) {
+      const p1Class = part1Correct ? 'input-correct' : '';
+      const p2Class = part2Correct ? 'input-correct' : '';
+      inputHtml = `
+        <div class="two-part-inputs">
+          <div class="two-part-input-group">
+            <span class="two-part-label">Part 1</span>
+            <input type="text" id="defGuess1" class="${p1Class}" placeholder="First part of definition…" autocomplete="off"
+              ${part1Correct ? 'readonly' : ''}
+              onkeydown="if(event.key==='Enter') checkAnswer()">
+            <span class="part-status">${part1Correct ? '✓' : ''}</span>
+          </div>
+          <div class="two-part-input-group">
+            <span class="two-part-label">Part 2</span>
+            <input type="text" id="defGuess2" class="${p2Class}" placeholder="Second part of definition…" autocomplete="off"
+              ${part2Correct ? 'readonly' : ''}
+              onkeydown="if(event.key==='Enter') checkAnswer()">
+            <span class="part-status">${part2Correct ? '✓' : ''}</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <button class="btn" onclick="checkAnswer()">Check</button>
+          <span style="font-size:0.72rem; color:var(--muted); align-self:center; letter-spacing:0.05em;">Both parts must be correct</span>
+        </div>`;
+    } else {
+      // Normal single-input mode (or 2-part toggled but definition has no delimiter)
+      inputHtml = `
+        <div class="input-row">
+          <input type="text" id="defGuess" placeholder="Enter definition…" autocomplete="off"
+                 onkeydown="if(event.key==='Enter') checkAnswer()">
+          <button class="btn" onclick="checkAnswer()">Check</button>
+        </div>`;
+    }
+
+    const modeBadgeSuffix = isTrulyTwoPart ? ' · ✦ 2-part' : (twoPartMode ? ' · (no split found)' : '');
+
     fc.innerHTML = `
-      <div class="word-badge">Deutsch → Englisch (${remainingAttempts} more correct to master)</div>
+      <div class="word-badge">Word → Definition (${remainingAttempts} more correct to master${modeBadgeSuffix})</div>
       <div class="phrase-text">${escHtml(currentCard.phrase)}</div>
       <div class="lives-row">
         ${livesHtml}
         <span style="margin-left:8px">${currentCard.correctCount} / ${REQUIRED_CORRECT} correct</span>
       </div>
-      <div class="input-row">
-        <input type="text" id="defGuess" placeholder="Enter definition…" autocomplete="off"
-               onkeydown="if(event.key==='Enter') checkAnswer()">
-        <button class="btn" onclick="checkAnswer()">Check</button>
-      </div>
+      ${inputHtml}
       <div class="feedback-msg" id="feedbackMsg"></div>
     `;
-    const inputField = document.getElementById('defGuess');
-    if (inputField) inputField.focus();
+
+    // Focus first available input
+    const firstInput = fc.querySelector('input[type="text"]:not([readonly])');
+    if (firstInput) firstInput.focus();
   }
 
   function checkAnswer() {
     if (!currentCard) return;
-    const input = document.getElementById('defGuess');
-    if (!input) return;
-    const userAnswer = input.value.trim();
-    const correctAnswer = currentCard.definition;
     const fc = flashcardDiv;
     const msgDiv = document.getElementById('feedbackMsg');
 
-    if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
-      // CORRECT
-      totalCorrect++;
-      // Increase correct count for this card, but not beyond REQUIRED_CORRECT
-      if (currentCard.correctCount < REQUIRED_CORRECT) {
-        currentCard.correctCount++;
+    const parts = twoPartMode ? splitDefinition(currentCard.definition) : null;
+    const isTrulyTwoPart = parts && parts.length === 2;
+
+    if (isTrulyTwoPart) {
+      // ── 2-part check ──
+      const input1 = document.getElementById('defGuess1');
+      const input2 = document.getElementById('defGuess2');
+      if (!input1 || !input2) return;
+
+      let changed = false;
+
+      if (!part1Correct) {
+        const val1 = input1.value.trim();
+        if (val1.toLowerCase() === parts[0].toLowerCase()) {
+          part1Correct = true;
+          input1.classList.add('input-correct');
+          input1.readOnly = true;
+          changed = true;
+        } else if (val1.length > 0) {
+          input1.classList.add('input-wrong');
+          setTimeout(() => input1.classList.remove('input-wrong'), 600);
+        }
       }
-      // If card reached REQUIRED_CORRECT correct answers -> mark as done
-      if (currentCard.correctCount >= REQUIRED_CORRECT) {
-        currentCard.done = true;
+
+      if (!part2Correct) {
+        const val2 = input2.value.trim();
+        if (val2.toLowerCase() === parts[1].toLowerCase()) {
+          part2Correct = true;
+          input2.classList.add('input-correct');
+          input2.readOnly = true;
+          changed = true;
+        } else if (val2.length > 0) {
+          input2.classList.add('input-wrong');
+          setTimeout(() => input2.classList.remove('input-wrong'), 600);
+        }
       }
-      fc.className = 'correct';
-      if (msgDiv) {
-        msgDiv.className = 'feedback-msg ok';
-        msgDiv.textContent = `✓ Richtig! (${currentCard.correctCount}/${REQUIRED_CORRECT} correct)`;
+
+      if (part1Correct && part2Correct) {
+        // Both correct!
+        totalCorrect++;
+        if (currentCard.correctCount < REQUIRED_CORRECT) currentCard.correctCount++;
+        if (currentCard.correctCount >= REQUIRED_CORRECT) currentCard.done = true;
+        fc.className = 'correct';
+        if (msgDiv) {
+          msgDiv.className = 'feedback-msg ok';
+          msgDiv.textContent = `✓ Both parts correct! (${currentCard.correctCount}/${REQUIRED_CORRECT} correct)`;
+        }
+        // Remove any reveal
+        const existingReveal = fc.querySelector('.answer-reveal');
+        if (existingReveal) existingReveal.remove();
+        setTimeout(() => { fc.className = ''; nextCard(); }, 900);
+
+      } else if (part1Correct || part2Correct) {
+        // Partial
+        fc.className = 'partial';
+        const doneCount = (part1Correct ? 1 : 0) + (part2Correct ? 1 : 0);
+        if (msgDiv) {
+          msgDiv.className = 'feedback-msg partial';
+          msgDiv.textContent = `✦ ${doneCount}/2 parts correct — keep going!`;
+        }
+        // Focus the remaining input
+        if (!part1Correct && document.getElementById('defGuess1')) document.getElementById('defGuess1').focus();
+        else if (!part2Correct && document.getElementById('defGuess2')) document.getElementById('defGuess2').focus();
+
+      } else {
+        // Both wrong
+        totalWrong++;
+        fc.className = 'wrong';
+        if (msgDiv) {
+          msgDiv.className = 'feedback-msg bad';
+          msgDiv.textContent = `✗ Try again — both parts needed.`;
+        }
+        if (!wrongShown) {
+          wrongShown = true;
+          const reveal = document.createElement('div');
+          reveal.className = 'answer-reveal partial-reveal';
+          reveal.innerHTML = `<strong>Correct answers:</strong> Part 1: ${escHtml(parts[0])} &nbsp;|&nbsp; Part 2: ${escHtml(parts[1])}`;
+          fc.appendChild(reveal);
+          setTimeout(() => { if (reveal && reveal.parentNode) reveal.remove(); }, 2500);
+        }
+        setTimeout(() => { fc.className = part1Correct || part2Correct ? 'partial' : ''; }, 700);
       }
-      input.value = '';
-      const existingReveal = fc.querySelector('.answer-reveal');
-      if (existingReveal) existingReveal.remove();
-      setTimeout(() => {
-        fc.className = '';
-        nextCard();
-      }, 800);
+
     } else {
-      // WRONG answer
-      totalWrong++;
-      fc.className = 'wrong';
-      if (msgDiv) {
-        msgDiv.className = 'feedback-msg bad';
-        msgDiv.textContent = `✗ Falsch. Try again.`;
+      // ── Normal single-input check ──
+      const input = document.getElementById('defGuess');
+      if (!input) return;
+      const userAnswer = input.value.trim();
+      const correctAnswer = currentCard.definition;
+
+      if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+        totalCorrect++;
+        if (currentCard.correctCount < REQUIRED_CORRECT) currentCard.correctCount++;
+        if (currentCard.correctCount >= REQUIRED_CORRECT) currentCard.done = true;
+        fc.className = 'correct';
+        if (msgDiv) {
+          msgDiv.className = 'feedback-msg ok';
+          msgDiv.textContent = `✓ Correct! (${currentCard.correctCount}/${REQUIRED_CORRECT} correct)`;
+        }
+        input.value = '';
+        const existingReveal = fc.querySelector('.answer-reveal');
+        if (existingReveal) existingReveal.remove();
+        setTimeout(() => { fc.className = ''; nextCard(); }, 800);
+      } else {
+        totalWrong++;
+        fc.className = 'wrong';
+        if (msgDiv) {
+          msgDiv.className = 'feedback-msg bad';
+          msgDiv.textContent = `✗ Try again.`;
+        }
+        if (!wrongShown) {
+          wrongShown = true;
+          const reveal = document.createElement('div');
+          reveal.className = 'answer-reveal';
+          reveal.innerHTML = `<strong>Correct answer:</strong> ${escHtml(correctAnswer)}`;
+          fc.appendChild(reveal);
+          setTimeout(() => { if (reveal && reveal.parentNode) reveal.remove(); }, 2000);
+        }
+        input.value = '';
+        setTimeout(() => { fc.className = ''; }, 700);
       }
-      // Show correct answer only once per wrong attempt
-      if (!wrongShown) {
-        wrongShown = true;
-        const reveal = document.createElement('div');
-        reveal.className = 'answer-reveal';
-        reveal.innerHTML = `<strong>Correct answer:</strong> ${escHtml(correctAnswer)}`;
-        fc.appendChild(reveal);
-        setTimeout(() => {
-          if (reveal && reveal.parentNode) reveal.remove();
-        }, 2000);
-      }
-      // No deduction of progress: wrong answers do NOT decrease correctCount.
-      input.value = '';
-      setTimeout(() => { fc.className = ''; }, 700);
     }
+
     updateStats();
-    renderWordList(); // update progress pips in word list
+    renderWordList();
   }
 
   // ── Stats & UI ───────────────────────────────────────────────
@@ -718,7 +937,6 @@
     nextCard();
   }
 
-  // ── Word list table (shows progress per card as N circles) ──
   function toggleWordList() {
     if (!tableWrap) return;
     tableWrap.style.display = tableWrap.style.display === 'none' ? 'block' : 'none';
@@ -728,23 +946,26 @@
     if (!wordListTable) return;
     if (allCards.length === 0) { wordListTable.innerHTML = ''; return; }
     const rowsHtml = allCards.map((card, idx) => {
-      // Generate REQUIRED_CORRECT circles (pips) representing correct answers achieved
       const pips = [];
       for (let i = 0; i < REQUIRED_CORRECT; i++) {
-        if (card.done) {
-          pips.push(`<span class="pip done" title="mastered"></span>`);
-        } else if (i < card.correctCount) {
-          pips.push(`<span class="pip active" title="correct answer achieved"></span>`);
-        } else {
-          pips.push(`<span class="pip" title="remaining correct needed"></span>`);
-        }
+        if (card.done) pips.push(`<span class="pip done"></span>`);
+        else if (i < card.correctCount) pips.push(`<span class="pip active"></span>`);
+        else pips.push(`<span class="pip"></span>`);
       }
       const pipContainer = `<div class="badge-lives">${pips.join('')}</div>`;
       const rowStyle = card.done ? 'opacity:0.5' : (currentCard === card ? 'background:var(--surface2)' : '');
+
+      // Show definition with parts highlighted if 2-part mode
+      const parts = splitDefinition(card.definition);
+      let defDisplay = escHtml(card.definition);
+      if (twoPartMode && parts.length === 2) {
+        defDisplay = `<span style="color:var(--purple)">${escHtml(parts[0])}</span> <span style="color:var(--muted)">·</span> <span style="color:var(--accent2)">${escHtml(parts[1])}</span>`;
+      }
+
       return `<tr style="${rowStyle}">
         <td style="color:var(--muted);font-size:0.7rem">${idx + 1}</td>
         <td style="font-weight:500;">${escHtml(card.phrase)}</td>
-        <td style="color:var(--muted)">${escHtml(card.definition)}</td>
+        <td style="color:var(--muted)">${defDisplay}</td>
         <td>${pipContainer} <span style="font-size:0.65rem; margin-left:6px;">${card.correctCount}/${REQUIRED_CORRECT}</span></td>
       </tr>`;
     }).join('');
@@ -754,7 +975,7 @@
         <tr>
           <th>#</th>
           <th>Deutsch</th>
-          <th>Definition</th>
+          <th>Definition${twoPartMode ? ' (Part 1 · Part 2)' : ''}</th>
           <th>Progress (${REQUIRED_CORRECT}✔️)</th>
         </tr>
       </thead>
@@ -767,13 +988,11 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // expose needed functions to global for inline onclick
   window.checkAnswer = checkAnswer;
   window.startGame = startGame;
   window.toggleWordList = toggleWordList;
   window.restartAll = restartAll;
 
-  // Initialize repeat label from radio default
   document.addEventListener('DOMContentLoaded', () => {
     onRepeatChange();
   });
