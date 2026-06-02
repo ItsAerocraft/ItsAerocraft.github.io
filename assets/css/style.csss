@@ -1,0 +1,7 @@
+---
+---
+@import "{{ site.theme }}";
+
+header, .page-header, .site-header {
+    display: none !important;
+}
