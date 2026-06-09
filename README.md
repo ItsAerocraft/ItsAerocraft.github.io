@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -5,7 +6,7 @@
 <title>Dietz</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  /* ── Nav ─────────────────────────────────────────────── */
+  /* ── Base ─────────────────────────────────────────────── */
   :root {
     --bg: #0e0e10;
     --surface: #16161a;
@@ -22,15 +23,12 @@
     --radius: 12px;
     --radius-sm: 8px;
     /* flashcard vars */
-    --fc-accent: #e8c547;
-    --fc-accent2: #5bc8af;
-    --fc-green: #5bc87a;
-    --fc-purple: #a78bfa;
-    --fc-surface: #1a1a1e;
-    --fc-surface2: #232328;
-    --fc-border: #2e2e36;
-    --fc-red: #e85454;
-    --fc-muted: #7a7a8a;
+    --fc-accent: #c3dee8;
+    --fc-accent2: #8eb9c7;
+    --fc-surface: #16161a;  
+    --fc-surface2: #1e1e24;
+    --fc-border: #2a2a32;
+    --fc-muted: rgba(240,239,244,0.45);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -95,9 +93,7 @@
   /* ════════════════════════════════════════════════════════
      REVISION TRACKER PAGE
   ════════════════════════════════════════════════════════ */
-  #page-tracker {
-    padding: 2rem 1.5rem 4rem;
-  }
+  #page-tracker { padding: 2rem 1.5rem 4rem; }
 
   .mono { font-family: 'Space Mono', monospace; }
 
@@ -165,25 +161,6 @@
   }
   .today-total span:first-child { font-size: 0.8rem; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
   .total-time { font-family: 'Space Mono', monospace; font-size: 1.5rem; color: var(--accent); font-weight: 700; }
-
-  .status-bar {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-  }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background 0.3s; }
-  .status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .status-dot.err { background: var(--red); }
-  .status-dot.loading { background: #aaa; animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   .section-label { font-size: 0.7rem; font-family: 'Space Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; padding-left: 2px; }
 
@@ -320,17 +297,6 @@
     transition: border-color 0.15s;
   }
   .field input:focus { border-color: var(--accent); }
-
-  .modal-note {
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-    padding: 0.75rem;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    border-left: 2px solid rgba(195,222,232,0.4);
-  }
 
   .modal-footer { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
 
@@ -470,7 +436,7 @@
   }
 
   .fc-header h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'DM Mono', monospace;
     font-size: 2rem;
     color: var(--fc-accent);
     letter-spacing: 0.02em;
@@ -500,6 +466,7 @@
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s;
     white-space: nowrap;
+    font-family: 'Space Mono', monospace;
   }
   .file-label:hover { border-color: var(--fc-accent); color: var(--fc-accent); }
   #fileInput { display: none; }
@@ -518,10 +485,11 @@
     border: 1px solid var(--fc-border);
     border-radius: 10px;
     padding: 8px 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s;
+    letter-spacing: 0.04em;
   }
   .small-btn:hover { border-color: var(--fc-accent); color: var(--fc-accent); }
 
@@ -531,11 +499,12 @@
     border: 1px solid var(--fc-border);
     border-radius: 10px;
     padding: 8px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s, background 0.2s;
     white-space: nowrap;
+    letter-spacing: 0.04em;
   }
   #twoPartBtn.active { background: #1e1530; border-color: var(--fc-purple); color: var(--fc-purple); }
   #twoPartBtn:hover { border-color: var(--fc-purple); color: var(--fc-purple); }
@@ -569,6 +538,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-top: 4px;
+    font-family: 'Space Mono', monospace;
   }
 
   .progress-wrap { width: 100%; max-width: 680px; margin-bottom: 24px; }
@@ -580,7 +550,7 @@
     transition: width 0.4s ease;
     width: 0%;
   }
-  .progress-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--fc-muted); margin-top: 6px; letter-spacing: 0.08em; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--fc-muted); margin-top: 6px; letter-spacing: 0.08em; font-family: 'Space Mono', monospace; }
 
   .window-indicator {
     width: 100%;
@@ -592,6 +562,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    font-family: 'Space Mono', monospace;
   }
   .window-indicator .dot {
     width: 7px; height: 7px;
@@ -616,6 +587,7 @@
     display: none;
     align-items: center;
     gap: 8px;
+    font-family: 'Space Mono', monospace;
   }
   .two-part-banner.visible { display: flex; }
 
@@ -645,6 +617,7 @@
     text-transform: uppercase;
     padding: 3px 8px;
     margin-bottom: 14px;
+    font-family: 'Space Mono', monospace;
   }
 
   .phrase-text {
@@ -663,6 +636,7 @@
     font-size: 0.7rem;
     color: var(--fc-muted);
     letter-spacing: 0.06em;
+    font-family: 'Space Mono', monospace;
   }
   .life { font-size: 1rem; transition: opacity 0.3s; }
   .life.dead { opacity: 0.2; }
@@ -671,7 +645,7 @@
 
   .two-part-inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
   .two-part-input-group { display: flex; gap: 10px; align-items: center; }
-  .two-part-label { font-size: 0.68rem; color: var(--fc-muted); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; min-width: 52px; }
+  .two-part-label { font-size: 0.68rem; color: var(--fc-muted); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; min-width: 52px; font-family: 'Space Mono', monospace; }
   .part-status { font-size: 0.9rem; min-width: 20px; text-align: center; }
 
   input[type="text"] {
@@ -697,13 +671,14 @@
     border: none;
     border-radius: var(--radius);
     padding: 12px 22px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
     cursor: pointer;
     letter-spacing: 0.05em;
     transition: background 0.2s, transform 0.1s;
     white-space: nowrap;
+    text-transform: uppercase;
   }
   .btn:hover { background: #f0d060; }
   .btn:active { transform: scale(0.97); }
@@ -723,6 +698,7 @@
     font-size: 0.9rem;
     color: #f0a0a0;
     letter-spacing: 0.04em;
+    font-family: 'DM Mono', monospace;
   }
   .answer-reveal strong { color: var(--fc-red); }
   .answer-reveal.partial-reveal { background: #1e1530; border-color: var(--fc-purple); color: #c4b5fd; }
@@ -730,10 +706,11 @@
 
   .feedback-msg {
     margin-top: 10px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 0.05em;
     min-height: 22px;
     transition: color 0.3s;
+    font-family: 'Space Mono', monospace;
   }
   .feedback-msg.ok { color: var(--fc-green); }
   .feedback-msg.bad { color: var(--fc-red); }
@@ -758,8 +735,8 @@
   }
   table { width: 100%; border-collapse: collapse; }
   thead { background: var(--fc-surface2); }
-  th { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fc-muted); text-align: left; }
-  td { padding: 10px 14px; font-size: 0.85rem; border-top: 1px solid var(--fc-border); vertical-align: middle; }
+  th { padding: 10px 14px; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fc-muted); text-align: left; font-family: 'Space Mono', monospace; }
+  td { padding: 10px 14px; font-size: 0.85rem; border-top: 1px solid var(--fc-border); vertical-align: middle; font-family: 'DM Mono', monospace; }
   tr:hover td { background: var(--fc-surface2); }
   .badge-lives { display: flex; gap: 4px; }
   .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--fc-border); }
@@ -768,7 +745,7 @@
 
   .empty-state { text-align: center; color: var(--fc-muted); padding: 40px 0; }
   .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .empty-state p { font-size: 0.85rem; letter-spacing: 0.05em; }
+  .empty-state p { font-size: 0.85rem; letter-spacing: 0.05em; font-family: 'Space Mono', monospace; }
 
   #completionScreen {
     display: none;
@@ -786,7 +763,220 @@
     color: var(--fc-accent);
     margin-bottom: 10px;
   }
-  #completionScreen p { color: var(--fc-muted); font-size: 0.85rem; margin-bottom: 24px; }
+  #completionScreen p { color: var(--fc-muted); font-size: 0.85rem; margin-bottom: 24px; font-family: 'Space Mono', monospace; }
+
+  /* ════════════════════════════════════════════════════════
+     SIGHT READING PAGE
+  ════════════════════════════════════════════════════════ */
+  #page-sight {
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .sr-header {
+    margin-bottom: 1.5rem;
+  }
+  .sr-header h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .sr-header p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .sr-settings-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .sr-setting-group {
+    background: var(--surface);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 130px;
+  }
+
+  .sr-setting-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 4px;
+  }
+
+  .sr-setting-group select {
+    width: 100%;
+    font-size: 0.82rem;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .sr-main-area {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .sr-staff-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 14px;
+    flex: 0 0 auto;
+  }
+
+  canvas#staff-canvas { display: block; }
+
+  .sr-input-panel {
+    flex: 1;
+    min-width: 220px;
+    background: var(--surface);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sr-section-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .sr-note-entry {
+    background: rgba(255,255,255,0.03);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 13px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .sr-note-entry.sr-active {
+    border-color: rgba(195,222,232,0.5);
+    background: rgba(195,222,232,0.06);
+  }
+
+  .sr-note-entry.sr-correct {
+    border-color: rgba(91,200,122,0.45);
+    background: rgba(91,200,122,0.08);
+  }
+
+  .sr-note-entry.sr-wrong {
+    border-color: rgba(255,107,107,0.45);
+    background: rgba(255,107,107,0.08);
+  }
+
+  .sr-note-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    min-height: 26px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .sr-note-display.sr-placeholder {
+    color: rgba(255,255,255,0.15);
+    font-weight: 400;
+    font-size: 1rem;
+    padding-top: 4px;
+  }
+
+  .sr-note-sublabel {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 3px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .sr-note-sublabel.sr-hint { color: var(--accent); }
+
+  .sr-kbd-guide {
+    border-top: 0.5px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .sr-kbd-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .sr-kbd-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .sr-kbd {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-width: 20px;
+    text-align: center;
+    letter-spacing: 0;
+  }
+
+  .sr-streak-block { display: flex; align-items: baseline; gap: 6px; }
+
+  .sr-streak-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .sr-streak-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sr-feedback {
+    font-size: 0.75rem;
+    min-height: 16px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .sr-feedback.sr-correct { color: var(--fc-green); }
+  .sr-feedback.sr-wrong   { color: var(--red); }
 </style>
 </head>
 <body>
@@ -796,6 +986,7 @@
   <span class="nav-brand">// Dietz</span>
   <button class="nav-tab active" onclick="switchPage('tracker')" id="tab-tracker">Revision Tracker</button>
   <button class="nav-tab" onclick="switchPage('flashcard')" id="tab-flashcard">Word Checker</button>
+  <button class="nav-tab" onclick="switchPage('sight')" id="tab-sight">Sight Reading</button>
 </nav>
 
 <!-- ════════════════════════════════════════════════════════
@@ -830,7 +1021,6 @@
     <div class="log-list" id="log-list"></div>
   </div>
 
-
   <!-- Subject manager modal -->
   <div class="modal-overlay" id="subjects-modal">
     <div class="modal">
@@ -860,11 +1050,11 @@
       </label>
       <button id="randomiseBtn" class="small-btn" title="Shuffle card order">🔀 Randomise</button>
       <button id="twoPartBtn" title="Require both parts of the definition (split by ; or /)">✦ 2-Part Mode</button>
-      <div style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted); font-size:0.82rem;">
-        <label style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted);">
+      <div style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted); font-size:0.72rem; font-family:'Space Mono',monospace;">
+        <label style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted); font-family:'Space Mono',monospace;">
           <input type="radio" name="repeatChoice" id="repeat1" value="1"> 1
         </label>
-        <label style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted);">
+        <label style="display:inline-flex; align-items:center; gap:6px; color:var(--fc-muted); font-family:'Space Mono',monospace;">
           <input type="radio" name="repeatChoice" id="repeat5" value="5" checked> 5
         </label>
       </div>
@@ -916,6 +1106,81 @@
 
 </div><!-- /page-flashcard -->
 
+<!-- ════════════════════════════════════════════════════════
+     PAGE 3 — SIGHT READING
+════════════════════════════════════════════════════════ -->
+<div class="page" id="page-sight">
+
+  <header class="sr-header">
+    <h1>Sight Reading</h1>
+    <p>Identify the note(s) shown on the staff</p>
+  </header>
+
+  <div class="sr-settings-row">
+    <div class="sr-setting-group">
+      <div class="sr-setting-label">Notes in chord</div>
+      <select id="set-a">
+        <option value="1" selected>1 note</option>
+        <option value="2">2 notes</option>
+        <option value="3">3 notes</option>
+        <option value="4">4 notes</option>
+      </select>
+    </div>
+    <div class="sr-setting-group">
+      <div class="sr-setting-label">Clef</div>
+      <select id="set-b">
+        <option value="treble">Treble</option>
+        <option value="bass">Bass</option>
+        <option value="random" selected>Randomise</option>
+      </select>
+    </div>
+    <div class="sr-setting-group">
+      <div class="sr-setting-label">Key</div>
+      <select id="set-c">
+        <option value="Cs" selected>C# minor</option>
+        <option value="C">C minor</option>
+        <option value="D">D minor</option>
+        <option value="G">G minor</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sr-main-area">
+    <div class="sr-staff-wrap">
+      <canvas id="staff-canvas"></canvas>
+    </div>
+    <div class="sr-input-panel">
+      <div>
+        <div class="sr-section-label">Your answer</div>
+        <div id="sr-note-entries"></div>
+      </div>
+      <div class="sr-kbd-guide">
+        <div class="sr-section-label">Keys</div>
+        <div class="sr-kbd-row">
+          <div class="sr-kbd-item"><span class="sr-kbd">A</span>–<span class="sr-kbd">G</span><span style="margin-left:2px;">note</span></div>
+        </div>
+        <div class="sr-kbd-row">
+          <div class="sr-kbd-item"><span class="sr-kbd">1</span><span>♭</span></div>
+          <div class="sr-kbd-item"><span class="sr-kbd">2</span><span>♮</span></div>
+          <div class="sr-kbd-item"><span class="sr-kbd">3</span><span>♯</span></div>
+        </div>
+        <div class="sr-kbd-row">
+          <div class="sr-kbd-item"><span class="sr-kbd">↵</span><span>confirm</span></div>
+          <div class="sr-kbd-item"><span class="sr-kbd">⌫</span><span>clear</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="sr-streak-block">
+          <span class="sr-streak-num" id="sr-streak-val">0</span>
+          <span class="sr-streak-label">streak</span>
+        </div>
+        <div class="sr-feedback" id="sr-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-sight -->
+
 <div class="toast" id="toast"></div>
 
 <!-- XLSX for flashcard page -->
@@ -930,6 +1195,11 @@ function switchPage(name) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'sight') {
+    // Re-init canvas in case it was rendered while hidden
+    initCanvas();
+    srDraw();
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -964,7 +1234,6 @@ function initTimers() {
 
 function colorFor(i) { return COLORS[i % COLORS.length]; }
 
-// ── Grid ──────────────────────────────────────────────
 function buildGrid() {
   const grid = document.getElementById('subjects-grid');
   grid.innerHTML = '';
@@ -990,7 +1259,6 @@ function buildGrid() {
   });
 }
 
-// ── Timers ────────────────────────────────────────────
 function toggleTimer(i) {
   const t = state.timers[i];
   if (!t.running) {
@@ -1030,19 +1298,14 @@ function tick() {
   document.getElementById('total-display').textContent = fmtTime(total);
 }
 
-// ── Logging ───────────────────────────────────────────
 async function logSession(i) {
   const t = state.timers[i];
   if (t.elapsed < 1000) { showToast('No time to log!', 'error'); return; }
   const subject = SUBJECTS[i].name;
   const date = todayISO();
   const time = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-  const hours = fmtHours(t.elapsed);
   const duration = fmtTime(t.elapsed);
-
   addLog(subject, t.elapsed, date, time);
-  await appendToSheet([date, time, subject, hours, duration]);
-
   t.todayTotal = (t.todayTotal || 0) + t.elapsed;
   t.elapsed = 0;
   t.startedAt = null;
@@ -1062,45 +1325,31 @@ function addLog(subject, ms, date, time) {
   document.getElementById('log-section').style.display = 'block';
 }
 
-// ── Copy to Excel ─────────────────────────────────────
-
 function copyToExcel() {
   const date = todayISO();
-
   const values = SUBJECTS.map((s, i) => {
     const t = state.timers[i];
     const currentElapsed = t.running ? Date.now() - t.startedAt : t.elapsed;
     const totalMs = (t.todayTotal || 0) + currentElapsed;
     return totalMs > 0 ? parseFloat((totalMs / 3600000).toFixed(4)) : 0;
   });
-
-  const grandTotalMs = state.timers.reduce((sum, t, i) => {
+  const grandTotalMs = state.timers.reduce((sum, t) => {
     const currentElapsed = t.running ? Date.now() - t.startedAt : t.elapsed;
     return sum + (t.todayTotal || 0) + currentElapsed;
   }, 0);
-
   const totalHours = parseFloat((grandTotalMs / 3600000).toFixed(4));
-
-  // Row: Date | Total time | Subject1 | Subject2 | ...
   const row = [date, totalHours, ...values];
   const tsv = row.join('\t');
-
   navigator.clipboard.writeText(tsv).then(() => {
     const btn = document.getElementById('copy-excel-btn');
     const label = document.getElementById('copy-label');
     btn.classList.add('copied');
     label.textContent = 'Copied!';
     showToast('Copied — paste into Excel!', 'success');
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      label.textContent = 'Copy for Excel';
-    }, 2500);
-  }).catch(() => {
-    showToast('Copy failed — try again', 'error');
-  });
+    setTimeout(() => { btn.classList.remove('copied'); label.textContent = 'Copy for Excel'; }, 2500);
+  }).catch(() => { showToast('Copy failed — try again', 'error'); });
 }
 
-// ── Subject manager ───────────────────────────────────
 let editBuffer = [];
 
 function openSubjects() {
@@ -1146,7 +1395,6 @@ function saveSubjects() {
   showToast('Subjects saved!', 'success');
 }
 
-// ── Helpers ───────────────────────────────────────────
 function fmtTime(ms) {
   const s = Math.floor(ms / 1000);
   const h = Math.floor(s / 3600);
@@ -1162,11 +1410,6 @@ function todayStr() {
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function setStatus(s, msg) {
-  document.getElementById('status-dot').className = 'status-dot ' + s;
-  document.getElementById('status-text').textContent = msg;
 }
 
 let toastTimer;
@@ -1377,7 +1620,7 @@ function renderCard() {
       </div>
       <div style="display:flex; gap:10px; margin-bottom:14px;">
         <button class="btn" onclick="checkAnswer()">Check</button>
-        <span style="font-size:0.72rem; color:var(--fc-muted); align-self:center; letter-spacing:0.05em;">Both parts must be correct</span>
+        <span style="font-size:0.7rem; color:var(--fc-muted); align-self:center; letter-spacing:0.05em; font-family:'Space Mono',monospace;">Both parts must be correct</span>
       </div>`;
   } else {
     inputHtml = `
@@ -1587,9 +1830,352 @@ window.startGame = startGame;
 window.toggleWordList = toggleWordList;
 window.restartAll = restartAll;
 
+/* ══════════════════════════════════════════════════════════
+   SIGHT READING
+══════════════════════════════════════════════════════════ */
+const KEY_SIGS = {
+  C:  { name: 'C minor',  flats: ['B','E','A'], sharps: [] },
+  D:  { name: 'D minor',  flats: ['B'],          sharps: [] },
+  G:  { name: 'G minor',  flats: ['B','E'],       sharps: [] },
+  Cs: { name: 'C# minor', flats: [],             sharps: ['F','C','G','D','A'] },
+};
+
+const TREBLE_POSITIONS = {
+  'D3':-8,'E3':-7,'F3':-6,'G3':-5,'A3':-4,'B3':-3,'C4':-2,'D4':-1,
+  'E4':0,'F4':1,'G4':2,'A4':3,'B4':4,'C5':5,'D5':6,'E5':7,'F5':8,'G5':9,
+  'A5':10,'B5':11,'C6':12,'D6':13,'E6':14,
+};
+const BASS_POSITIONS = {
+  'A1':-6,'B1':-5,'C2':-4,'D2':-3,'E2':-2,'F2':-1,
+  'G2':0,'A2':1,'B2':2,'C3':3,'D3':4,'E3':5,'F3':6,'G3':7,'A3':8,'B3':9,
+  'C4':10,'D4':11,'E4':12,'F4':13,'G4':14,
+};
+const TREBLE_POOL = Object.keys(TREBLE_POSITIONS);
+const BASS_POOL   = Object.keys(BASS_POSITIONS);
+
+let srState = {
+  notesCount: 1, clefMode: 'random', keyMode: 'C',
+  currentClef: 'treble', currentNotes: [],
+  inputs: [],
+  streak: 0, locked: false,
+};
+
+function srPickClef() {
+  if (srState.clefMode === 'random') return Math.random() < 0.5 ? 'treble' : 'bass';
+  return srState.clefMode;
+}
+function srNoteBase(s) { return s.slice(0,-1); }
+function srAccSymbol(a) { return a==='#'?'♯':a==='b'?'♭':a==='n'?'♮':''; }
+
+function srGenNotes(clef, n, key) {
+  const pool = clef==='treble' ? TREBLE_POOL : BASS_POOL;
+  const sig = KEY_SIGS[key];
+  const result = [];
+  const usedPos = new Set();
+  let attempts = 0;
+  while (result.length < n && attempts < 300) {
+    attempts++;
+    const noteStr = pool[Math.floor(Math.random()*pool.length)];
+    const posMap = clef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
+    const pos = posMap[noteStr];
+    if (usedPos.has(pos)) continue;
+    usedPos.add(pos);
+    const base = srNoteBase(noteStr);
+    let acc = null;
+    if (sig.sharps.includes(base)) acc = '#';
+    else if (sig.flats.includes(base)) acc = 'b';
+    result.push({ noteStr, base, acc });
+  }
+  const posMap2 = clef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
+  result.sort((a,b) => posMap2[a.noteStr]-posMap2[b.noteStr]);
+  return result;
+}
+
+function srEntryDisplay(e) {
+  if (!e||!e.letter) return null;
+  return e.letter + srAccSymbol(e.acc);
+}
+
+function srNewQuestion() {
+  srState.currentClef = srPickClef();
+  srState.currentNotes = srGenNotes(srState.currentClef, srState.notesCount, srState.keyMode);
+  srState.inputs = Array(srState.notesCount).fill(null).map(()=>({letter:null,acc:null}));
+  srState.locked = false;
+  srUpdateFeedback('','');
+  srRenderEntries('idle');
+  srDraw();
+}
+
+function srRenderEntries(mode, correctArr) {
+  const container = document.getElementById('sr-note-entries');
+  container.innerHTML = '';
+  const n = srState.notesCount;
+  const firstEmpty = srState.inputs.findIndex(e=>!e.letter);
+
+  for (let i=0; i<n; i++) {
+    const div = document.createElement('div');
+    div.className = 'sr-note-entry';
+    div.style.marginBottom = i<n-1 ? '5px' : '0';
+    const inp = srState.inputs[i];
+    const display = srEntryDisplay(inp);
+
+    if (mode==='result' && correctArr) {
+      div.classList.add(correctArr[i]?'sr-correct':'sr-wrong');
+    } else if (display) {
+      div.classList.add('sr-active');
+    } else if (i===firstEmpty) {
+      div.classList.add('sr-active');
+    }
+
+    const noteDisp = document.createElement('div');
+    noteDisp.className = 'sr-note-display'+(display?'':' sr-placeholder');
+    noteDisp.textContent = display || (n>1?`Note ${i+1}`:'Note');
+
+    const sub = document.createElement('div');
+    sub.className = 'sr-note-sublabel';
+
+    if (mode==='result' && correctArr) {
+      const ans = srState.currentNotes[i];
+      const ansStr = ans.base+srAccSymbol(ans.acc);
+      sub.textContent = correctArr[i] ? '✓ correct' : `answer: ${ansStr}`;
+      sub.style.color = correctArr[i] ? 'var(--fc-green)' : 'var(--red)';
+    } else if (display) {
+      sub.className = 'sr-note-sublabel sr-hint';
+      sub.textContent = inp.acc ? 'Enter to confirm' : '1 ♭  2 ♮  3 ♯  then Enter';
+    } else if (i===firstEmpty) {
+      sub.className = 'sr-note-sublabel sr-hint';
+      sub.textContent = 'type a letter key';
+    } else {
+      sub.textContent = '—';
+    }
+
+    div.appendChild(noteDisp);
+    div.appendChild(sub);
+    container.appendChild(div);
+  }
+}
+
+function srUpdateFeedback(msg,cls) {
+  const el = document.getElementById('sr-feedback');
+  el.textContent = msg; el.className = 'sr-feedback '+cls;
+}
+
+function srCheckAnswers() {
+  const sig = KEY_SIGS[srState.keyMode];
+  const correct = srState.currentNotes.map((note,i)=>{
+    const inp = srState.inputs[i];
+    if (!inp||!inp.letter) return false;
+    const letterMatch = inp.letter.toUpperCase()===note.base.toUpperCase();
+    let expectedAcc = null;
+    if (sig.sharps.includes(note.base)) expectedAcc='#';
+    else if (sig.flats.includes(note.base)) expectedAcc='b';
+    const inpAcc = inp.acc==='n' ? null : inp.acc;
+    return letterMatch && inpAcc===expectedAcc;
+  });
+  const allCorrect = correct.every(Boolean);
+  srRenderEntries('result', correct);
+  if (allCorrect) {
+    srState.streak++;
+    document.getElementById('sr-streak-val').textContent = srState.streak;
+    srUpdateFeedback('Correct!','sr-correct');
+    setTimeout(()=>srNewQuestion(), 700);
+  } else {
+    srState.streak = 0;
+    document.getElementById('sr-streak-val').textContent = 0;
+    srUpdateFeedback('Wrong — see answers above','sr-wrong');
+    srState.locked = true;
+    setTimeout(()=>{ srState.locked=false; srNewQuestion(); }, 2000);
+  }
+}
+
+document.addEventListener('keydown', e=>{
+  // Only handle keys when sight reading page is active
+  if (!document.getElementById('page-sight').classList.contains('active')) return;
+  if (srState.locked) return;
+  const k = e.key.toUpperCase();
+
+  if ('ABCDEFG'.includes(k)&&k.length===1) {
+    e.preventDefault();
+    const idx = srState.inputs.findIndex(s=>!s.letter);
+    if (idx===-1) return;
+    srState.inputs[idx].letter = k;
+    srState.inputs[idx].acc = null;
+    srRenderEntries('idle'); return;
+  }
+  if (e.key==='1'||e.key==='2'||e.key==='3') {
+    e.preventDefault();
+    const acc = e.key==='1'?'b':e.key==='2'?'n':'#';
+    for (let i=srState.inputs.length-1; i>=0; i--) {
+      if (srState.inputs[i].letter) { srState.inputs[i].acc=acc; break; }
+    }
+    srRenderEntries('idle'); return;
+  }
+  if (e.key==='Backspace') {
+    e.preventDefault();
+    for (let i=srState.inputs.length-1; i>=0; i--) {
+      if (srState.inputs[i].letter) { srState.inputs[i]={letter:null,acc:null}; break; }
+    }
+    srRenderEntries('idle'); return;
+  }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (!srState.inputs.every(s=>s.letter)) {
+      srUpdateFeedback('Fill all '+srState.notesCount+' note(s) first',''); return;
+    }
+    srCheckAnswers(); return;
+  }
+});
+
+document.getElementById('set-a').addEventListener('change',e=>{ srState.notesCount=parseInt(e.target.value); srNewQuestion(); });
+document.getElementById('set-b').addEventListener('change',e=>{ srState.clefMode=e.target.value; srNewQuestion(); });
+document.getElementById('set-c').addEventListener('change',e=>{ srState.keyMode=e.target.value; srNewQuestion(); });
+
+// ─── Drawing ─────────────────────────────────────────────────────────────────
+
+const CW = 240, CH = 280;
+
+function initCanvas() {
+  const canvas = document.getElementById('staff-canvas');
+  canvas.width = CW*2; canvas.height = CH*2;
+  canvas.style.width = CW+'px'; canvas.style.height = CH+'px';
+}
+
+function srDraw() {
+  const canvas = document.getElementById('staff-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(2,2);
+  ctx.clearRect(0,0,CW,CH);
+
+  const lineCol = 'rgba(255,255,255,0.18)';
+  const noteCol = '#e8e8e8';
+  const ledgCol = 'rgba(255,255,255,0.4)';
+  const keyCol  = 'rgba(195,222,232,0.55)';
+  const clefCol = '#d8d8d8';
+
+  const STEP = 10;
+  const staffCY = CH/2 + 5;
+  const staffTop = staffCY - 2*STEP;
+
+  ctx.strokeStyle = lineCol; ctx.lineWidth = 0.8;
+  for (let i=0; i<5; i++) {
+    const y = staffTop + (4-i*2)*STEP;
+    ctx.beginPath(); ctx.moveTo(8,y); ctx.lineTo(CW-8,y); ctx.stroke();
+  }
+
+  function posToY(pos) { return staffTop + (4-pos)*STEP; }
+
+  srDrawClef(ctx, srState.currentClef, staffTop, STEP, clefCol);
+
+  ctx.fillStyle = keyCol;
+  ctx.font = `400 9px 'Space Mono', monospace`;
+  ctx.textAlign = 'right';
+  ctx.fillText(KEY_SIGS[srState.keyMode].name, CW-8, 12);
+
+  const posMap = srState.currentClef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
+  const cx = CW/2 + 8;
+  const NR = STEP*0.52;
+
+  const positions = srState.currentNotes.map(n=>posMap[n.noteStr]);
+  const offsets = srComputeChordOffsets(positions, NR);
+
+  const allX = offsets.map(o => cx+o);
+  const xMin = Math.min(...allX) - NR - 5;
+  const xMax = Math.max(...allX) + NR + 5;
+  const minPos = Math.min(...positions);
+  const maxPos = Math.max(...positions);
+
+  ctx.strokeStyle = ledgCol; ctx.lineWidth = 1.2;
+
+  if (minPos < 0) {
+    const lowestEven = minPos % 2 === 0 ? minPos : minPos - 1;
+    for (let lp = -2; lp >= lowestEven; lp -= 2) {
+      const ly = posToY(lp);
+      ctx.beginPath(); ctx.moveTo(xMin, ly); ctx.lineTo(xMax, ly); ctx.stroke();
+    }
+  }
+
+  if (maxPos > 8) {
+    const highestEven = maxPos % 2 === 0 ? maxPos : maxPos + 1;
+    for (let lp = 10; lp <= highestEven; lp += 2) {
+      const ly = posToY(lp);
+      ctx.beginPath(); ctx.moveTo(xMin, ly); ctx.lineTo(xMax, ly); ctx.stroke();
+    }
+  }
+
+  srState.currentNotes.forEach((note,i)=>{
+    const pos = posMap[note.noteStr];
+    if (pos===undefined) return;
+    const y = posToY(pos);
+    const nx = cx + offsets[i];
+
+    ctx.fillStyle = noteCol;
+    ctx.beginPath();
+    ctx.ellipse(nx, y, NR, NR*0.74, -0.18, 0, Math.PI*2);
+    ctx.fill();
+
+    if (note.acc) {
+      ctx.fillStyle = noteCol;
+      ctx.font = `bold ${STEP*1.55}px serif`;
+      ctx.textAlign = 'right';
+      ctx.fillText(srAccSymbol(note.acc), nx-NR-1, y+STEP*0.44);
+    }
+  });
+
+  if (positions.length>0) {
+    const lowestPos  = Math.min(...positions);
+    const highestPos = Math.max(...positions);
+    const midPos = (lowestPos+highestPos)/2;
+    const stemUp = midPos < 4;
+    ctx.strokeStyle = noteCol; ctx.lineWidth = 1.2;
+    if (stemUp) {
+      const topY = posToY(highestPos)-STEP*3.5;
+      const botY = posToY(lowestPos);
+      const maxOff = Math.max(...offsets);
+      const sx = cx+maxOff+NR-0.5;
+      ctx.beginPath(); ctx.moveTo(sx,botY); ctx.lineTo(sx,topY); ctx.stroke();
+    } else {
+      const botY = posToY(lowestPos)+STEP*3.5;
+      const topY = posToY(highestPos);
+      const minOff = Math.min(...offsets);
+      const sx = cx+minOff-NR+0.5;
+      ctx.beginPath(); ctx.moveTo(sx,topY); ctx.lineTo(sx,botY); ctx.stroke();
+    }
+  }
+}
+
+function srComputeChordOffsets(positions, NR) {
+  const n = positions.length;
+  if (n===0) return [];
+  const offsets = new Array(n).fill(0);
+  for (let i=0; i<n-1; i++) {
+    if (Math.abs(positions[i+1]-positions[i])<=1) {
+      offsets[i]   = -(NR+1);
+      offsets[i+1] =  (NR+1);
+      i++;
+    }
+  }
+  return offsets;
+}
+
+function srDrawClef(ctx, clef, staffTop, STEP, color) {
+  ctx.fillStyle = color;
+  if (clef==='treble') {
+    ctx.font = `${STEP*7.2}px serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('𝄞', 6, staffTop+STEP*5.2);
+  } else {
+    ctx.font = `${STEP*4.4}px serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('𝄢', 8, staffTop+STEP*3.3);
+  }
+}
+
 /* ── Boot ── */
 initTracker();
 onRepeatChange();
+initCanvas();
+srNewQuestion();
 </script>
 </body>
 </html>
