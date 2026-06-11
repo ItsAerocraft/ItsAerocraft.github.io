@@ -1872,7 +1872,7 @@ const TREBLE_POOL = Object.keys(TREBLE_POSITIONS);
 const BASS_POOL   = Object.keys(BASS_POSITIONS);
 
 let srState = {
-  notesCount: 1, clefMode: 'random', keyMode: 'C',
+  notesCount: 1, clefMode: 'random', keyMode: 'Cs',
   currentClef: 'treble', currentNotes: [],
   inputs: [],
   streak: 0, locked: false,
@@ -1970,7 +1970,7 @@ function srRenderEntries(mode, correctArr) {
       sub.style.color = correctArr[i] ? 'var(--fc-green)' : 'var(--red)';
     } else if (display) {
       sub.className = 'sr-note-sublabel sr-hint';
-      sub.textContent = inp.acc ? 'Enter to confirm' : '1 ♭  2 ♮  3 ♯  then Enter';
+      sub.textContent = inp.acc ? 'Enter to confirm' : '1 ♭  2 ♮  3 ♯  — then Enter';
     } else if (i===firstEmpty) {
       sub.className = 'sr-note-sublabel sr-hint';
       sub.textContent = 'type a letter key';
@@ -1990,31 +1990,26 @@ function srUpdateFeedback(msg,cls) {
 }
 
 function srCheckAnswers() {
-  const sig = KEY_SIGS[srState.keyMode];
   const correct = srState.currentNotes.map((note, i) => {
     const inp = srState.inputs[i];
     if (!inp || !inp.letter) return false;
 
     const letterMatch = inp.letter.toUpperCase() === note.base.toUpperCase();
 
-    // note.acc is the actual sounding accidental (null = natural, '#' = sharp, 'b' = flat)
-    // note.courtesyAcc is set to 'n' when the note is a natural overriding the key sig
-    // The user must identify the note as it SOUNDS, not as written in key sig
-    const expectedAcc = note.acc; // null, '#', or 'b'
-
-    let accMatch;
-    if (inp.acc === null) {
-      // User typed no modifier — accepted as-is (key sig applies implicitly)
-      // BUT if there's a courtesy natural on this note, we still accept it
-      // because the user may simply type the letter to mean "natural" when they see ♮
-      accMatch = true;
-    } else if (inp.acc === 'n') {
-      // User explicitly typed ♮ — correct only if the note is natural
-      accMatch = (expectedAcc === null);
-    } else {
-      // User typed # or b — must match exactly
-      accMatch = (inp.acc === expectedAcc);
-    }
+    // note.acc: '#' | 'b' | null (null = natural, whether naturally so or courtesy-overridden)
+    // note.courtesyAcc: 'n' when a ♮ is explicitly drawn on the note overriding the key sig.
+    //
+    // Bare letter (no modifier typed):
+    //   → accepted for standard key-sig notes (key sig is implied, user doesn't need to type ♯/♭)
+    //   → NOT accepted when a courtesy ♮ is shown on the note; user must type ♮ to prove they saw it
+    // Explicit ♮: correct only when the note is actually natural
+    // Explicit ♯ or ♭: must match note.acc exactly
+    // Resolve what the user entered to a concrete accidental:
+    // null (no modifier) → treated as natural (the user claims the note is unaltered)
+    // 'n' (explicit ♮)   → also natural
+    // '#' or 'b'         → sharp or flat
+    const inpAcc = (inp.acc === null || inp.acc === 'n') ? null : inp.acc;
+    const accMatch = (inpAcc === note.acc);
 
     return letterMatch && accMatch;
   });
