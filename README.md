@@ -1195,7 +1195,6 @@ function switchPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'sight') {
-    // Re-init canvas in case it was rendered while hidden
     initCanvas();
     srDraw();
   }
@@ -1833,10 +1832,30 @@ window.restartAll = restartAll;
    SIGHT READING
 ══════════════════════════════════════════════════════════ */
 const KEY_SIGS = {
+  //           key sig notes only — accidentals are assigned by srGenNotes
   C:  { name: 'C minor',  flats: ['B','E','A'], sharps: [] },
   D:  { name: 'D minor',  flats: ['B'],          sharps: [] },
   G:  { name: 'G minor',  flats: ['B','E'],       sharps: [] },
-  Cs: { name: 'C# minor', flats: [],             sharps: ['F','C','G','D','A'] },
+  Cs: { name: 'C# minor', flats: [],             sharps: ['F','C','G','D'] },
+};
+
+// Standard staff positions for key-sig accidental symbols (pos = half-steps from E4/G2 middle line).
+// Sharps order: F C G D  (conventional, matching the 4-sharp key sigs we use)
+// Treble: F5=8, C5=5, G5=9, D5=6
+// Bass:   F3=6, C3=3, G3=7, D3=4
+const KEY_SIG_SHARP_POSITIONS = {
+  treble: { F:8, C:5, G:9, D:6 },
+  bass:   { F:6, C:3, G:7, D:4 },
+};
+// Flats order: B E A  (the three flat keys we use go up to 3 flats)
+// Treble: Bb4=4, Eb4=0 (or Eb5=7 — conventional is Eb4 on treble), Ab4=3
+// Bass:   Bb2=2, Eb2=-2 (or Eb3=5), Ab2=1
+// Using standard engraving positions:
+//   Treble: Bb→line 4 (pos 4), Eb→space 0 (middle, pos 0), Ab→space 3 (pos 3)
+//   Bass:   Bb→line 2 (pos 2), Eb→space below staff (pos -2), Ab→space 1 (pos 1)
+const KEY_SIG_FLAT_POSITIONS = {
+  treble: { B:4, E:0, A:3 },
+  bass:   { B:2, E:-2, A:1 },
 };
 
 const TREBLE_POSITIONS = {
@@ -1868,6 +1887,7 @@ function srAccSymbol(a) { return a==='#'?'♯':a==='b'?'♭':a==='n'?'♮':''; }
 
 function srGenNotes(clef, n, key) {
   const pool = clef==='treble' ? TREBLE_POOL : BASS_POOL;
+  const posMap = clef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
   const sig = KEY_SIGS[key];
   const result = [];
   const usedPos = new Set();
@@ -1875,18 +1895,28 @@ function srGenNotes(clef, n, key) {
   while (result.length < n && attempts < 300) {
     attempts++;
     const noteStr = pool[Math.floor(Math.random()*pool.length)];
-    const posMap = clef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
     const pos = posMap[noteStr];
     if (usedPos.has(pos)) continue;
     usedPos.add(pos);
     const base = srNoteBase(noteStr);
-    let acc = null;
-    if (sig.sharps.includes(base)) acc = '#';
-    else if (sig.flats.includes(base)) acc = 'b';
-    result.push({ noteStr, base, acc });
+
+    // Key-sig accidental for this note letter
+    let keySigAcc = null;
+    if (sig.sharps.includes(base)) keySigAcc = '#';
+    else if (sig.flats.includes(base)) keySigAcc = 'b';
+
+    // ~20% chance: override with a natural (courtesy accidental shown on note)
+    // Only meaningful when the key sig would otherwise alter this note
+    let acc = keySigAcc;
+    let courtesyAcc = null;
+    if (keySigAcc !== null && Math.random() < 0.20) {
+      acc = null;        // note is natural
+      courtesyAcc = 'n'; // draw a ♮ next to the notehead
+    }
+
+    result.push({ noteStr, base, acc, courtesyAcc });
   }
-  const posMap2 = clef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
-  result.sort((a,b) => posMap2[a.noteStr]-posMap2[b.noteStr]);
+  result.sort((a,b) => posMap[a.noteStr]-posMap[b.noteStr]);
   return result;
 }
 
@@ -1961,34 +1991,51 @@ function srUpdateFeedback(msg,cls) {
 
 function srCheckAnswers() {
   const sig = KEY_SIGS[srState.keyMode];
-  const correct = srState.currentNotes.map((note,i)=>{
+  const correct = srState.currentNotes.map((note, i) => {
     const inp = srState.inputs[i];
-    if (!inp||!inp.letter) return false;
-    const letterMatch = inp.letter.toUpperCase()===note.base.toUpperCase();
-    let expectedAcc = null;
-    if (sig.sharps.includes(note.base)) expectedAcc='#';
-    else if (sig.flats.includes(note.base)) expectedAcc='b';
-    const inpAcc = inp.acc==='n' ? null : inp.acc;
-    return letterMatch && inpAcc===expectedAcc;
+    if (!inp || !inp.letter) return false;
+
+    const letterMatch = inp.letter.toUpperCase() === note.base.toUpperCase();
+
+    // note.acc is the actual sounding accidental (null = natural, '#' = sharp, 'b' = flat)
+    // note.courtesyAcc is set to 'n' when the note is a natural overriding the key sig
+    // The user must identify the note as it SOUNDS, not as written in key sig
+    const expectedAcc = note.acc; // null, '#', or 'b'
+
+    let accMatch;
+    if (inp.acc === null) {
+      // User typed no modifier — accepted as-is (key sig applies implicitly)
+      // BUT if there's a courtesy natural on this note, we still accept it
+      // because the user may simply type the letter to mean "natural" when they see ♮
+      accMatch = true;
+    } else if (inp.acc === 'n') {
+      // User explicitly typed ♮ — correct only if the note is natural
+      accMatch = (expectedAcc === null);
+    } else {
+      // User typed # or b — must match exactly
+      accMatch = (inp.acc === expectedAcc);
+    }
+
+    return letterMatch && accMatch;
   });
+
   const allCorrect = correct.every(Boolean);
   srRenderEntries('result', correct);
   if (allCorrect) {
     srState.streak++;
     document.getElementById('sr-streak-val').textContent = srState.streak;
     srUpdateFeedback('Correct!','sr-correct');
-    setTimeout(()=>srNewQuestion(), 700);
+    setTimeout(()=>srNewQuestion(), 400);
   } else {
     srState.streak = 0;
     document.getElementById('sr-streak-val').textContent = 0;
     srUpdateFeedback('Wrong — see answers above','sr-wrong');
     srState.locked = true;
-    setTimeout(()=>{ srState.locked=false; srNewQuestion(); }, 2000);
+    setTimeout(()=>{ srState.locked=false; srNewQuestion(); }, 400);
   }
 }
 
 document.addEventListener('keydown', e=>{
-  // Only handle keys when sight reading page is active
   if (!document.getElementById('page-sight').classList.contains('active')) return;
   if (srState.locked) return;
   const k = e.key.toUpperCase();
@@ -2051,11 +2098,13 @@ function srDraw() {
   const ledgCol = 'rgba(255,255,255,0.4)';
   const keyCol  = 'rgba(195,222,232,0.55)';
   const clefCol = '#d8d8d8';
+  const keySigCol = 'rgba(195,222,232,0.75)';
 
   const STEP = 10;
   const staffCY = CH/2 + 5;
   const staffTop = staffCY - 2*STEP;
 
+  // Draw staff lines
   ctx.strokeStyle = lineCol; ctx.lineWidth = 0.8;
   for (let i=0; i<5; i++) {
     const y = staffTop + (4-i*2)*STEP;
@@ -2064,15 +2113,66 @@ function srDraw() {
 
   function posToY(pos) { return staffTop + (4-pos)*STEP; }
 
+  // Draw clef
   srDrawClef(ctx, srState.currentClef, staffTop, STEP, clefCol);
 
+  // Key name label (top right)
   ctx.fillStyle = keyCol;
   ctx.font = `400 9px 'Space Mono', monospace`;
   ctx.textAlign = 'right';
   ctx.fillText(KEY_SIGS[srState.keyMode].name, CW-8, 12);
 
+  // ── Draw key signature accidentals on the staff ──────────────────────────
+  const sig = KEY_SIGS[srState.keyMode];
+  const keySigX = srState.currentClef === 'treble' ? 38 : 34; // start just after clef
+  const accSpacing = 9; // horizontal spacing between accidentals
+  ctx.fillStyle = keySigCol;
+  ctx.font = `bold ${STEP * 1.6}px serif`;
+  ctx.textAlign = 'center';
+
+  // Sharp order: F C G D A (E B) — standard circle-of-fifths order
+  const SHARP_ORDER = ['F','C','G','D','A','E','B'];
+  // Flat order:  B E A D G C F
+  const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
+
+  const posMap_keysig = srState.currentClef === 'treble'
+    ? KEY_SIG_SHARP_POSITIONS.treble
+    : KEY_SIG_SHARP_POSITIONS.bass;
+  const posMap_flat_keysig = srState.currentClef === 'treble'
+    ? KEY_SIG_FLAT_POSITIONS.treble
+    : KEY_SIG_FLAT_POSITIONS.bass;
+
+  if (sig.sharps.length > 0) {
+    let xOff = 0;
+    for (const note of SHARP_ORDER) {
+      if (!sig.sharps.includes(note)) continue;
+      const pos = posMap_keysig[note];
+      if (pos === undefined) continue;
+      const y = posToY(pos);
+      ctx.fillText('♯', keySigX + xOff, y + STEP * 0.38);
+      xOff += accSpacing;
+    }
+  } else if (sig.flats.length > 0) {
+    let xOff = 0;
+    for (const note of FLAT_ORDER) {
+      if (!sig.flats.includes(note)) continue;
+      const pos = posMap_flat_keysig[note];
+      if (pos === undefined) continue;
+      const y = posToY(pos);
+      ctx.fillText('♭', keySigX + xOff, y + STEP * 0.38);
+      xOff += accSpacing;
+    }
+  }
+
+  // How wide the key sig takes up (used to offset note placement)
+  const keySigWidth = sig.sharps.length > 0
+    ? sig.sharps.length * accSpacing
+    : sig.flats.length * accSpacing;
+
+  // Note horizontal centre — shifted right to clear key sig
+  const cx = keySigX + keySigWidth + 22;
+
   const posMap = srState.currentClef==='treble' ? TREBLE_POSITIONS : BASS_POSITIONS;
-  const cx = CW/2 + 8;
   const NR = STEP*0.52;
 
   const positions = srState.currentNotes.map(n=>posMap[n.noteStr]);
@@ -2084,6 +2184,7 @@ function srDraw() {
   const minPos = Math.min(...positions);
   const maxPos = Math.max(...positions);
 
+  // Ledger lines
   ctx.strokeStyle = ledgCol; ctx.lineWidth = 1.2;
 
   if (minPos < 0) {
@@ -2102,6 +2203,7 @@ function srDraw() {
     }
   }
 
+  // Draw noteheads (no accidental drawn on the note itself — it's shown in key sig)
   srState.currentNotes.forEach((note,i)=>{
     const pos = posMap[note.noteStr];
     if (pos===undefined) return;
@@ -2113,14 +2215,17 @@ function srDraw() {
     ctx.ellipse(nx, y, NR, NR*0.74, -0.18, 0, Math.PI*2);
     ctx.fill();
 
-    if (note.acc) {
+    // Draw courtesy accidental next to note if it overrides the key sig
+    // (e.g. a natural sign on a note that would otherwise be sharp/flat)
+    if (note.courtesyAcc) {
       ctx.fillStyle = noteCol;
       ctx.font = `bold ${STEP*1.55}px serif`;
       ctx.textAlign = 'right';
-      ctx.fillText(srAccSymbol(note.acc), nx-NR-1, y+STEP*0.44);
+      ctx.fillText(srAccSymbol(note.courtesyAcc), nx-NR-1, y+STEP*0.44);
     }
   });
 
+  // Stem
   if (positions.length>0) {
     const lowestPos  = Math.min(...positions);
     const highestPos = Math.max(...positions);
